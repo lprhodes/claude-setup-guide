@@ -696,6 +696,27 @@
 <span class="cmd">gh</span> auth login</code></pre>
     </div>
 
+    <h3>GitHub Actions with Claude</h3>
+    <p>Once the GitHub CLI is set up, you can connect Claude Code to your repos as a GitHub Action. This lets you <code>@claude</code> mention in any PR or issue to get AI-powered code reviews, implementations, and fixes&mdash;all following your project's standards.</p>
+    <p>The quickest way to set it up is from inside a Claude Code session:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Inside Claude Code</span>
+      </div>
+      <pre><code><span class="comment"># Run this inside an active Claude Code session</span>
+<span class="cmd">/install-github-app</span></code></pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">&#9432;</div>
+      <div>
+        <strong>You'll need to be a repo admin</strong> to install the GitHub app and add secrets. The app requests read &amp; write permissions for Contents, Issues, and Pull Requests. Once installed, just tag <code>@claude</code> in any issue or PR comment to trigger it. See the full <a href="https://code.claude.com/docs/en/github-actions" target="_blank" rel="noopener">GitHub Actions docs</a> for manual setup and advanced configuration.
+      </div>
+    </div>
+
     <h3>Vercel CLI</h3>
     <p>The simplest way to deploy personal projects. No AWS complexity, no DevOps overhead&mdash;just push and ship.</p>
     <div class="code-block">
