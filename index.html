@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Claude Code Field Guide — A Beginner's Setup for macOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root {
+    --bg: #FAF6F0;
+    --bg-warm: #F5EDE3;
+    --ink: #2D2018;
+    --ink-light: #5C4A3A;
+    --ink-faint: #9A8677;
+    --terracotta: #C45D3E;
+    --terracotta-light: #E8A28E;
+    --terracotta-glow: rgba(196,93,62,0.08);
+    --sage: #5B7A5E;
+    --sage-light: #A3BFA6;
+    --sage-glow: rgba(91,122,94,0.08);
+    --code-bg: #2D2018;
+    --code-fg: #F5EDE3;
+    --code-accent: #E8A28E;
+    --amber: #D4952A;
+    --amber-glow: rgba(212,149,42,0.1);
+    --card-shadow: 0 1px 3px rgba(45,32,24,0.06), 0 8px 24px rgba(45,32,24,0.04);
+    --card-shadow-hover: 0 2px 8px rgba(45,32,24,0.08), 0 16px 40px rgba(45,32,24,0.06);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  ::selection {
+    background: var(--terracotta-light);
+    color: var(--ink);
+  }
+
+  /* ─── Nav ─── */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(250,246,240,0.85);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-bottom: 1px solid rgba(45,32,24,0.06);
+    transform: translateY(-100%);
+    transition: transform 0.5s var(--ease-out);
+  }
+  .nav.visible { transform: translateY(0); }
+  .nav-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .nav-title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .nav-links a {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    color: var(--terracotta);
+    background: var(--terracotta-glow);
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140%;
+    height: 80%;
+    background: radial-gradient(ellipse at center, var(--terracotta-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    background: var(--terracotta-glow);
+    border: 1px solid rgba(196,93,62,0.12);
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s var(--ease-out) forwards;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    max-width: 700px;
+    opacity: 0;
+    animation: fadeUp 1s 0.4s var(--ease-out) forwards;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--ink-light);
+    max-width: 480px;
+    margin-top: 1.5rem;
+    line-height: 1.65;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s var(--ease-out) forwards;
+  }
+  .hero-scroll {
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s 1s var(--ease-out) forwards;
+  }
+  .hero-scroll a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .hero-scroll a:hover { color: var(--terracotta); }
+  .hero-scroll svg {
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Content ─── */
+  .content {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ─── Section ─── */
+  .section {
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  }
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .section-label .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: white;
+  }
+  .section-label.terracotta .num { background: var(--terracotta); }
+  .section-label.sage .num { background: var(--sage); }
+  .section-label.amber .num { background: var(--amber); }
+  .section-label.terracotta { color: var(--terracotta); }
+  .section-label.sage { color: var(--sage); }
+  .section-label.amber { color: var(--amber); }
+
+  .section h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+  .section h3 {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .section p {
+    color: var(--ink-light);
+    margin-bottom: 1rem;
+  }
+  .section p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: var(--card-shadow);
+    margin: 1.25rem 0;
+    transition: box-shadow 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+    border: 1px solid rgba(45,32,24,0.04);
+  }
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-1px);
+  }
+  .card h4 {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card p {
+    font-size: 0.92rem;
+    color: var(--ink-light);
+    margin-bottom: 0.5rem;
+    line-height: 1.65;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Grid cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .card-grid .card {
+    margin: 0;
+  }
+
+  /* ─── Code blocks ─── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(45,32,24,0.15);
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .code-dot:nth-child(1) { background: #FF6058; }
+  .code-dot:nth-child(2) { background: #FFBD2E; }
+  .code-dot:nth-child(3) { background: #27CA40; }
+  .code-filename {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+    margin-left: 0.5rem;
+  }
+  .code-block pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+  .code-block code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--code-fg);
+  }
+  .code-block .comment { color: rgba(255,255,255,0.35); }
+  .code-block .fn { color: #7EC8E3; }
+  .code-block .str { color: var(--sage-light); }
+  .code-block .flag { color: var(--code-accent); }
+  .code-block .cmd { color: #E8A28E; }
+  .code-block .kw { color: #D4A0E8; }
+
+  /* Inline code */
+  code:not([class]) {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: rgba(45,32,24,0.06);
+    color: var(--terracotta);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+
+  /* ─── Callouts ─── */
+  .callout {
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .callout-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    margin-top: 0.1rem;
+  }
+  .callout.tip {
+    background: var(--sage-glow);
+    border: 1px solid rgba(91,122,94,0.12);
+    color: var(--ink-light);
+  }
+  .callout.tip .callout-icon {
+    background: rgba(91,122,94,0.12);
+  }
+  .callout.warn {
+    background: var(--amber-glow);
+    border: 1px solid rgba(212,149,42,0.15);
+    color: var(--ink-light);
+  }
+  .callout.warn .callout-icon {
+    background: rgba(212,149,42,0.12);
+  }
+  .callout.danger {
+    background: rgba(196,62,62,0.05);
+    border: 1px solid rgba(196,62,62,0.1);
+    color: var(--ink-light);
+  }
+  .callout.danger .callout-icon {
+    background: rgba(196,62,62,0.1);
+  }
+  .callout strong {
+    color: var(--ink);
+  }
+  .callout a {
+    color: var(--terracotta);
+    text-decoration-color: var(--terracotta-light);
+    text-underline-offset: 2px;
+  }
+
+  /* ─── Links ─── */
+  a {
+    color: var(--terracotta);
+    text-decoration: underline;
+    text-decoration-color: var(--terracotta-light);
+    text-underline-offset: 2px;
+    transition: text-decoration-color 0.2s;
+  }
+  a:hover {
+    text-decoration-color: var(--terracotta);
+  }
+
+  /* ─── Lists ─── */
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+  .checklist li {
+    position: relative;
+    padding: 0.6rem 0 0.6rem 2rem;
+    color: var(--ink-light);
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(45,32,24,0.05);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--terracotta-light);
+    border-radius: 4px;
+  }
+
+  /* ─── MCP grid ─── */
+  .mcp-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(45,32,24,0.04);
+    transition: all 0.3s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+  }
+  .mcp-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+  .mcp-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+  .mcp-card.tc::before { background: var(--terracotta); }
+  .mcp-card.sg::before { background: var(--sage); }
+  .mcp-card.am::before { background: var(--amber); }
+  .mcp-card.ink::before { background: var(--ink); }
+  .mcp-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .mcp-card .tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+  .mcp-card.tc .tag { background: var(--terracotta-glow); color: var(--terracotta); }
+  .mcp-card.sg .tag { background: var(--sage-glow); color: var(--sage); }
+  .mcp-card.am .tag { background: var(--amber-glow); color: var(--amber); }
+  .mcp-card.ink .tag { background: rgba(45,32,24,0.06); color: var(--ink-light); }
+  .mcp-card p {
+    font-size: 0.88rem;
+    color: var(--ink-light);
+    line-height: 1.55;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(45,32,24,0.1) 30%, rgba(45,32,24,0.1) 70%, transparent);
+    margin: 4rem 0;
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    text-align: center;
+    padding: 3rem 2rem 4rem;
+    color: var(--ink-faint);
+    font-size: 0.82rem;
+  }
+  .footer p { color: var(--ink-faint); }
+  .footer-mark {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+
+  /* ─── Step indicator ─── */
+  .step-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .step-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    background: rgba(45,32,24,0.04);
+    color: var(--ink-light);
+    border: 1px solid rgba(45,32,24,0.06);
+  }
+  .step-arrow {
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 640px) {
+    html { font-size: 15px; }
+    .nav-links { display: none; }
+    .content { padding: 0 1.25rem 4rem; }
+    .card { padding: 1.25rem; }
+    .code-block pre { padding: 1rem; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <span class="nav-title">The Field Guide</span>
+    <div class="nav-links">
+      <a href="#foundations">Foundations</a>
+      <a href="#terminal">Terminal</a>
+      <a href="#tooling">Tooling</a>
+      <a href="#workflows">Workflows</a>
+      <a href="#mcps">MCPs</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-badge">Field Guide &bull; 2025 Edition</div>
+  <h1>The Claude Code <em>Field Guide</em></h1>
+  <p class="hero-subtitle">
+    A beautifully opinionated setup guide for macOS. From zero to a powerful AI-assisted development workflow.
+  </p>
+  <div class="hero-scroll">
+    <a href="#foundations">
+      Begin the journey
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M4 9l4 4 4-4"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- Content -->
+<main class="content">
+
+  <!-- 1. Foundations -->
+  <section class="section" id="foundations">
+    <div class="section-label terracotta"><span class="num">1</span> Foundations</div>
+    <h2>Start with the right plan</h2>
+    <p>
+      Before anything else: subscribe to <strong>Claude Max 5</strong>. This gives you access to Claude Code, the most powerful way to work with Claude for software development. Use <strong>Opus</strong> as your model for everything&mdash;it's the most capable for code.
+    </p>
+
+    <div class="callout tip">
+      <div class="callout-icon">&#9432;</div>
+      <div>
+        <strong>A note on usage limits.</strong> Some users have reported hitting limits faster than expected in the past week. Anthropic is actively investigating. If it happens to you, just wait a bit&mdash;it's a known issue being resolved.
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--terracotta)" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Claude Code
+        </h4>
+        <p>The primary interface. Runs in your terminal or as a VS Code extension. Most power users prefer the terminal directly.</p>
+      </div>
+      <div class="card">
+        <h4>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          Opus Model
+        </h4>
+        <p>Use Opus for everything. It's the strongest model for reasoning, code generation, and complex multi-step tasks.</p>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">&#128161;</div>
+      <div>
+        <strong>Clear your context often.</strong> Even though Claude Code now supports up to 1M tokens of context, you'll get better results by clearing frequently. Use <code>/clear</code> between tasks to keep responses sharp and focused.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Terminal Setup -->
+  <section class="section" id="terminal">
+    <div class="section-label sage"><span class="num">2</span> Terminal Setup</div>
+    <h2>Install the essentials</h2>
+    <p>
+      Open <strong>Terminal.app</strong> (press <code>Cmd + Space</code>, type "Terminal", hit Enter). Then install these two CLI tools. They'll integrate beautifully with Claude Code later.
+    </p>
+
+    <h3>GitHub CLI</h3>
+    <p>Lets Claude Code create pull requests, manage issues, and interact with GitHub directly from your terminal.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Terminal</span>
+      </div>
+      <pre><code><span class="comment"># Install GitHub CLI</span>
+<span class="cmd">brew</span> install gh
+
+<span class="comment"># Log in to your GitHub account</span>
+<span class="cmd">gh</span> auth login</code></pre>
+    </div>
+
+    <h3>Vercel CLI</h3>
+    <p>The simplest way to deploy personal projects. No AWS complexity, no DevOps overhead&mdash;just push and ship.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Terminal</span>
+      </div>
+      <pre><code><span class="comment"># Install Vercel CLI</span>
+<span class="cmd">npm</span> install <span class="flag">-g</span> vercel
+
+<span class="comment"># Log in to your Vercel account</span>
+<span class="cmd">vercel</span> login</code></pre>
+    </div>
+
+    <h3>Keep Claude Code updated</h3>
+    <p>Anthropic ships major improvements daily. Run this every morning to make sure you're on the latest version.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Terminal</span>
+      </div>
+      <pre><code><span class="comment"># Update Claude Code to the latest version</span>
+<span class="cmd">claude</span> install</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">&#9432;</div>
+      <div>
+        Run <code>claude install</code> daily rather than relying on auto-update. With the pace of new features landing, you'll want to be on the latest.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Tooling & Skills -->
+  <section class="section" id="tooling">
+    <div class="section-label amber"><span class="num">3</span> Tooling &amp; Skills</div>
+    <h2>Extend with skills</h2>
+    <p>
+      <a href="https://skills.sh" target="_blank" rel="noopener">Skills.sh</a> adds powerful capabilities to Claude Code. Install it, then add skills from Vercel and Anthropic for the best results.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Terminal</span>
+      </div>
+      <pre><code><span class="comment"># Install Skills.sh</span>
+<span class="cmd">npm</span> install <span class="flag">-g</span> skills-sh
+
+<span class="comment"># Then browse and add skills from trusted publishers</span>
+<span class="cmd">skills</span> install <span class="str">@vercel/ai-sdk</span>
+<span class="cmd">skills</span> install <span class="str">@anthropic/claude-code</span></code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">&#9888;</div>
+      <div>
+        <strong>Stick to well-known publishers</strong> (Vercel, Anthropic, etc.). Some community skill repositories have hundreds of plugins with high ratings&mdash;but third-party skills can contain vulnerabilities. Quality over quantity.
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <div class="callout-icon">&#9888;</div>
+      <div>
+        <strong>Security alert: axios npm package.</strong> North Korean threat actors have been <a href="https://cloud.google.com/blog/topics/threat-intelligence/north-korea-threat-actor-targets-axios-npm-package/" target="_blank" rel="noopener">targeting the axios TypeScript package</a> in the past week. If your projects use axios, update your dependencies immediately.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Permissions -->
+  <section class="section" id="workflows">
+    <div class="section-label terracotta"><span class="num">4</span> Workflows</div>
+    <h2>Permissions &amp; shell aliases</h2>
+    <p>
+      Claude Code asks for permission before running commands. For beginners, this is a good thing&mdash;you'll see exactly what's happening. As you get comfortable, here are the permission tiers:
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Default Mode
+        </h4>
+        <p><strong>Recommended for beginners.</strong> Claude asks before every file edit and terminal command. Safe and educational.</p>
+      </div>
+      <div class="card">
+        <h4>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          Auto Mode
+        </h4>
+        <p>Claude makes its own judgment calls on what's safe to run. Currently for Team plan users. <a href="https://claude.com/blog/auto-mode" target="_blank" rel="noopener">Learn more</a>.</p>
+      </div>
+      <div class="card">
+        <h4>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-light)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Sandbox Mode
+        </h4>
+        <p>Runs commands in an isolated environment. Great for experimenting safely. <a href="https://code.claude.com/docs/en/sandboxing" target="_blank" rel="noopener">Sandboxing docs</a>.</p>
+      </div>
+    </div>
+
+    <h3>Power-user shell aliases</h3>
+    <p>
+      Once you're more comfortable, you can add shortcuts to your shell configuration. These let you launch Claude Code with a single word.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">~/.zshrc</span>
+      </div>
+      <pre><code><span class="comment"># Continue your last Claude session</span>
+<span class="fn">claudey</span>() {
+    <span class="cmd">security</span> unlock-keychain ~/Library/Keychains/login.keychain-db
+    <span class="cmd">claude</span> <span class="flag">--dangerously-skip-permissions</span> <span class="flag">--continue</span>
+}
+
+<span class="comment"># Start a fresh Claude session</span>
+<span class="fn">claudey-new</span>() {
+    <span class="cmd">security</span> unlock-keychain ~/Library/Keychains/login.keychain-db
+    <span class="cmd">claude</span> <span class="flag">--dangerously-skip-permissions</span>
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">&#9888;</div>
+      <div>
+        <strong>For beginners: skip the <code>--dangerously-skip-permissions</code> flag.</strong> It disables all safety prompts, which means Claude can modify files and run commands without asking you first. Start with default or auto mode until you're confident navigating the terminal.
+      </div>
+    </div>
+
+    <p>After editing <code>~/.zshrc</code>, reload it in any open terminal:</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <span class="code-filename">Terminal</span>
+      </div>
+      <pre><code><span class="cmd">source</span> ~/.zshrc</code></pre>
+    </div>
+
+    <h3>Remote access</h3>
+    <p>
+      You can access a running Claude Code session from anywhere&mdash;your phone or another computer&mdash;using the <code>/remote</code> command inside an active session. You can also start a session with the <code>--remote</code> flag.
+    </p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 5. MCP Servers -->
+  <section class="section" id="mcps">
+    <div class="section-label sage"><span class="num">5</span> MCP Servers</div>
+    <h2>Supercharge with MCPs</h2>
+    <p>
+      MCP (Model Context Protocol) servers give Claude Code access to external tools and services. Think of them as plugins that let Claude read your browser, manage tasks, search docs, and more.
+    </p>
+
+    <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="mcp-card tc">
+        <div class="tag">Documentation</div>
+        <h4>Ref.tools</h4>
+        <p>Fetches relevant documentation context so Claude always references the latest API docs. Well worth paying for.</p>
+      </div>
+      <div class="mcp-card sg">
+        <div class="tag">Project Management</div>
+        <h4>Linear</h4>
+        <p>Fetch tasks, compare against codebases, generate clarifying questions in multi-choice format, then build implementation plans.</p>
+      </div>
+      <div class="mcp-card am">
+        <div class="tag">AI Components</div>
+        <h4>AI Elements</h4>
+        <p>Vercel's AI UI components. Pair with <code>ai-sdk</code> for building AI-powered interfaces with pre-built, polished components.</p>
+      </div>
+      <div class="mcp-card ink">
+        <div class="tag">Browser Testing</div>
+        <h4>Chrome DevTools</h4>
+        <p>Let Claude interact with your browser&mdash;take screenshots, inspect elements, run Lighthouse audits. Swap with Playwright as needed.</p>
+      </div>
+      <div class="mcp-card ink">
+        <div class="tag">Containers</div>
+        <h4>Docker MCP</h4>
+        <p>Read container logs, manage Docker Compose stacks. Ideal for local dev environments with MongoDB, Redis, and more.</p>
+      </div>
+      <div class="mcp-card tc">
+        <div class="tag">AI Development</div>
+        <h4>Vercel AI SDK</h4>
+        <p>The recommended package for all AI-related code. Consistent API across providers, streaming support, and great TypeScript types.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 6. UI/UX Workflow -->
+  <section class="section" id="polish">
+    <div class="section-label amber"><span class="num">6</span> Pro Tip</div>
+    <h2>The two-pass UI workflow</h2>
+    <p>
+      Here's a workflow for getting truly polished interfaces: use <strong>Claude Code for implementation</strong>, then <strong>Gemini for visual refinement</strong>.
+    </p>
+
+    <div class="step-flow">
+      <span class="step-pill">Claude Code builds it</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-pill">Screenshot the UI</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-pill">Feed to Gemini</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-pill">Refined design</span>
+    </div>
+
+    <div class="card">
+      <h4>The process</h4>
+      <p>
+        1. Build your feature with Claude Code.<br>
+        2. Take a screenshot of a UI you admire for reference.<br>
+        3. Open <strong>Gemini CLI</strong> or <strong>AI Studio</strong> (not the Gemini website).<br>
+        4. Give it the screenshot + a detailed prompt covering fonts, colours, padding, margins, and layout.<br>
+        5. Ask it to generate a design prompt that another AI assistant can execute.<br>
+        6. Feed that prompt back into Gemini CLI to refine your interface.
+      </p>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">&#128161;</div>
+      <div>
+        This two-pass approach plays to each model's strengths: Claude's deep code reasoning for architecture, and Gemini's visual understanding for UI polish.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-mark">&#10043;</div>
+  <p>The Claude Code Field Guide &middot; A beginner's companion for macOS</p>
+  <p style="margin-top:0.4rem; font-size:0.75rem;">Built with care. Ship with confidence.</p>
+</footer>
+
+<script>
+  // Sticky nav on scroll
+  const nav = document.getElementById('nav');
+  const hero = document.querySelector('.hero');
+  const observer = new IntersectionObserver(
+    ([e]) => nav.classList.toggle('visible', !e.isIntersecting),
+    { threshold: 0.1 }
+  );
+  observer.observe(hero);
+
+  // Reveal sections on scroll
+  const sections = document.querySelectorAll('.section');
+  const sectionObs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          sectionObs.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+  sections.forEach(s => sectionObs.observe(s));
+</script>
+</body>
+</html>
